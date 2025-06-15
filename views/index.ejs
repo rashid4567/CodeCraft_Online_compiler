@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="/storage.css">
+    <link id="prism-theme-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <link id="prism-theme-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" disabled>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="light-mode">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-terminal"></i>
+                    <h1>Rashid's Compiler</h1>
+                </div>
+                <div class="header-actions">
+                    <span id="currentFileName" class="current-file-name">Untitled Code</span>
+                    <button id="saveBtn" class="btn btn-secondary" title="Save Code (Ctrl+S)">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button id="loadBtn" class="btn btn-secondary" title="Load Code (Ctrl+O)">
+                        <i class="fas fa-folder-open"></i> Load
+                    </button>
+                    <button id="libraryBtn" class="btn btn-secondary" title="Open Library (Ctrl+L)">
+                        <i class="fas fa-book"></i> Library
+                    </button>
+                    <button id="themeBtn" class="theme-btn">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark Mode</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Editor Section -->
+            <section class="editor-section">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="language-selector">
+                        <label for="language">Language:</label>
+                        <select id="language">
+                            <option value="javascript" selected>JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="csharp">C#</option>
+                            <option value="cpp">C++</option>
+                            <option value="html">HTML</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button id="runBtn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Run Code
+                        </button>
+                        <button id="clearBtn" class="btn btn-secondary">
+                            <i class="fas fa-trash-alt"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Editor -->
+                <div class="editor-header">
+                    <span>CODE EDITOR</span>
+                    <div class="editor-stats">
+                        <span id="lineCount">Lines: 1</span>
+                        <span id="charCount">Chars: 0</span>
+                        <span id="wordCount">Words: 0</span>
+                    </div>
+                </div>
+
+                <div class="editor-container">
+                    <div class="line-numbers" id="lineNumbers">1</div>
+                    <div class="editor-wrapper">
+                        <textarea 
+                            id="codeEditor" 
+                            class="code-textarea"
+                            placeholder="Write your code here..."
+                            spellcheck="false"
+                            autocomplete="off"
+                            autocorrect="off"
+                            autocapitalize="off"
+                        ></textarea>
+                        <pre id="codeHighlight" class="code-highlight language-javascript"><code class="language-javascript"></code></pre>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="input-section">
+                    <div class="input-header">
+                        <span>PROGRAM INPUT</span>
+                        <small>(Optional, for languages like Python, Java, C++, C#)</small>
+                    </div>
+                    <textarea 
+                        id="inputArea" 
+                        class="input-textarea"
+                        placeholder="Enter program input here (if any)..."
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </section>
+
+            <!-- Output Section -->
+            <section class="output-section">
+                <div class="output-header">
+                    <span>OUTPUT</span>
+                    <div class="execution-info">
+                        <span id="executionStatus" class="status-waiting">Waiting</span>
+                        <span id="executionTime">Time: 0ms</span>
+                    </div>
+                </div>
+                <div class="output-container">
+                    <pre id="outputArea" class="output-content">Compiler output will appear here...</pre>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Save Code Modal -->
+    <div id="saveModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Save Code Snippet</h2>
+                <button id="closeSaveModal" class="close-modal-btn">&times;</button>
+            </div>
+            <form id="saveForm" class="modal-form">
+                <div class="form-group">
+                    <label for="codeTitle">Title:</label>
+                    <input type="text" id="codeTitle" name="title" required />
+                </div>
+                <div class="form-group">
+                    <label for="codeDescription">Description (Optional):</label>
+                    <textarea id="codeDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="codeAuthor">Author (Optional):</label>
+                    <input type="text" id="codeAuthor" name="author" placeholder="Anonymous" />
+                </div>
+                <div class="form-group">
+                    <label for="codeTags">Tags (Optional, comma-separated):</label>
+                    <input type="text" id="codeTags" name="tags" placeholder="e.g., javascript, array, sort" />
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <input type="checkbox" id="isPublic" name="isPublic" />
+                    <label for="isPublic">Make this code public?</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelSave" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Code</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Load Code Modal -->
+    <div id="loadModal" class="modal-overlay">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Load Code Snippet</h2>
+                <button id="closeLoadModal" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="load-controls">
+                <input type="text" id="searchCodes" placeholder="Search by title, tag, author..." />
+                <select id="filterLanguage">
+                    <option value="all">All Languages</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="csharp">C#</option>
+                    <option value="cpp">C++</option>
+                    <option value="html">HTML</option>
+                </select>
+                <select id="sortBy">
+                    <option value="createdAt">Sort by Date</option>
+                    <option value="title">Sort by Title</option>
+                    <option value="likes">Sort by Likes</option>
+                </select>
+            </div>
+            <div id="codesList" class="codes-list">
+                <!-- Codes will be loaded here -->
+            </div>
+            <div id="pagination" class="pagination-controls">
+                <!-- Pagination will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Modal -->
+    <div id="libraryModal" class="modal-overlay">
+        <div class="modal-content modal-xl">
+            <div class="modal-header">
+                <h2>Code Library</h2>
+                <button id="closeLibraryModal" class="close-modal-btn">&times;</button>
+            </div>
+            <div class="library-tabs">
+                <button class="tab-btn active" data-tab="browse">
+                    <i class="fas fa-globe-americas"></i> Browse Public Codes
+                </button>
+                <button class="tab-btn" data-tab="my-codes">
+                    <i class="fas fa-user-cog"></i> My Codes
+                </button>
+                <button class="tab-btn" data-tab="statistics">
+                    <i class="fas fa-chart-bar"></i> Statistics
+                </button>
+            </div>
+            <div class="library-content">
+                <!-- Browse Tab -->
+                <div id="browseTab" class="tab-pane active">
+                    <div class="library-controls">
+                        <input type="text" id="librarySearch" placeholder="Search public codes..." />
+                        <select id="libraryFilterLanguage">
+                            <option value="all">All Languages</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="csharp">C#</option>
+                            <option value="cpp">C++</option>
+                            <option value="html">HTML</option>
+                        </select>
+                    </div>
+                    <div id="libraryGrid" class="library-grid">
+                        <!-- Public codes will be loaded here -->
+                    </div>
+                </div>
+                <!-- My Codes Tab -->
+                <div id="myCodesTab" class="tab-pane">
+                    <div id="myCodesList" class="my-codes-list">
+                        <!-- User's private/public codes will be loaded here -->
+                    </div>
+                </div>
+                <!-- Statistics Tab -->
+                <div id="statisticsTab" class="tab-pane">
+                    <div id="statsGrid" class="stats-grid">
+                        <!-- Statistics will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div class="loading-text">
+                <h3>Processing...</h3>
+                <p>Please wait while we handle your request.</p>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prism.js Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- Prism.js Languages (Load components as needed) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script> <!-- For HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/storage.js"></script>
+</body>
+</html>

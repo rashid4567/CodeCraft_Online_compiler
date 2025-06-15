@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/index.css" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+      }
+      .error-container {
+        padding: 40px;
+        background-color: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        max-width: 500px;
+      }
+      .error-icon {
+        font-size: 5rem;
+        color: var(--accent-danger);
+        margin-bottom: 20px;
+        animation: pulseError 1.5s infinite;
+      }
+      @keyframes pulseError {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+      }
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        color: var(--text-secondary);
+      }
+      .btn-home {
+        text-decoration: none;
+        color: var(--text-inverse);
+        background-color: var(--accent-primary);
+        padding: 12px 25px;
+        border-radius: var(--radius);
+        font-weight: 600;
+        transition: background-color var(--transition-fast), transform var(--transition-fast);
+      }
+      .btn-home:hover {
+        background-color: #0056b3; /* Darken primary */
+        transform: translateY(-2px);
+      }
+      .theme-btn-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="theme-btn-container">
+        <button id="themeBtn" class="theme-btn">
+            <i class="fas fa-moon"></i>
+            <span>Dark Mode</span>
+        </button>
+    </div>
+
+    <div class="error-container">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h1>Oops! Page Not Found</h1>
+      <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+      <a href="/" class="btn btn-primary"><i class="fas fa-home"></i> Go to Homepage</a>
+    </div>
+
+    <script>
+      // Basic theme toggle for 404 page
+      const themeBtn = document.getElementById('themeBtn');
+      const body = document.body;
+      const themeIcon = themeBtn.querySelector('i');
+      const themeText = themeBtn.querySelector('span');
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          body.classList.add('dark-mode');
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+          themeText.textContent = 'Light Mode';
+          localStorage.setItem('theme', 'dark');
+        } else {
+          body.classList.remove('dark-mode');
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+          themeText.textContent = 'Dark Mode';
+          localStorage.setItem('theme', 'light');
+        }
+      }
+
+      themeBtn.addEventListener('click', () => {
+        const currentTheme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+        applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+      });
+
+      // Apply saved theme on load
+      const savedTheme = localStorage.getItem('theme') || 'light'; // Default to light
+      applyTheme(savedTheme);
+    </script>
+  </body>
+</html>
